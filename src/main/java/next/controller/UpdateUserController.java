@@ -16,11 +16,10 @@ import core.db.DataBase;
 import next.model.User;
 
 @WebServlet(value = { "/users/update", "/users/updateForm" })
-public class UpdateUserController extends HttpServlet {
+public class UpdateUserController implements Controller {
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(UpdateUserController.class);
 
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String userId = req.getParameter("userId");
         User user = DataBase.findUserById(userId);
@@ -32,7 +31,6 @@ public class UpdateUserController extends HttpServlet {
         rd.forward(req, resp);
     }
 
-    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User user = DataBase.findUserById(req.getParameter("userId"));
         if (!UserSessionUtils.isSameUser(req.getSession(), user)) {
@@ -44,5 +42,10 @@ public class UpdateUserController extends HttpServlet {
         log.debug("Update User : {}", updateUser);
         user.update(updateUser);
         resp.sendRedirect("/");
+    }
+
+    @Override
+    public String execute(HttpServletRequest request, HttpServletResponse response) {
+        return null;
     }
 }

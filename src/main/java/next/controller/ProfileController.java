@@ -12,10 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet("/users/profile")
-public class ProfileController extends HttpServlet {
+public class ProfileController implements Controller {
     private static final long serialVersionUID = 1L;
 
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String userId = req.getParameter("userId");
         User user = DataBase.findUserById(userId);
@@ -25,5 +24,10 @@ public class ProfileController extends HttpServlet {
         req.setAttribute("user", user);
         RequestDispatcher rd = req.getRequestDispatcher("/user/profile.jsp");
         rd.forward(req, resp);
+    }
+
+    @Override
+    public String execute(HttpServletRequest request, HttpServletResponse response) {
+        return null;
     }
 }

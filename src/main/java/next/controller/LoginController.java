@@ -14,15 +14,13 @@ import core.db.DataBase;
 import next.model.User;
 
 @WebServlet(value = { "/users/login", "/users/loginForm" })
-public class LoginController extends HttpServlet {
+public class LoginController implements Controller {
     private static final long serialVersionUID = 1L;
 
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         forward("/user/login.jsp", req, resp);
     }
 
-    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String userId = req.getParameter("userId");
         String password = req.getParameter("password");
@@ -47,5 +45,10 @@ public class LoginController extends HttpServlet {
             throws ServletException, IOException {
         RequestDispatcher rd = req.getRequestDispatcher(forwardUrl);
         rd.forward(req, resp);
+    }
+
+    @Override
+    public String execute(HttpServletRequest request, HttpServletResponse response) {
+        return null;
     }
 }

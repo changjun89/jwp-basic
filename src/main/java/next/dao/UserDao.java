@@ -9,10 +9,11 @@ import java.util.List;
 
 import core.jdbc.ConnectionManager;
 import core.jdbc.JdbcTemplate;
+import core.jdbc.SelectJdbcTemplate;
 import next.model.User;
 
 public class UserDao {
-    public void insert(User user) throws SQLException {
+    public void addUser(User user) throws SQLException {
         String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
         JdbcTemplate template = new JdbcTemplate() {
             @Override
@@ -23,33 +24,32 @@ public class UserDao {
                 pstmt.setString(4,user.getEmail());
             }
         };
-        template.insert(sql);
+        template.executeUpate(sql);
     }
 
-
-
-    public void update(User user) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        try {
-            con = ConnectionManager.getConnection();
-            String sql = "UPDATE USERS SET PASSWORD=? , NAME =?, EMAIL=? WHERE USERID=?";
-            pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, user.getPassword());
-            pstmt.setString(2, user.getName());
-            pstmt.setString(3, user.getEmail());
-            pstmt.setString(4, user.getUserId());
-
-            pstmt.executeUpdate();
-        } finally {
-            if (pstmt != null) {
-                pstmt.close();
+    public void updateUser(User user) throws SQLException {
+        String sql = "UPDATE USERS SET PASSWORD=? , NAME =?, EMAIL=? WHERE USERID=?";
+        JdbcTemplate template = new JdbcTemplate() {
+            @Override
+            public void setParam(PreparedStatement pstmt) throws SQLException {
+                pstmt.setString(1, user.getPassword());
+                pstmt.setString(2, user.getName());
+                pstmt.setString(3, user.getEmail());
+                pstmt.setString(4, user.getUserId());
             }
+        };
+        template.executeUpate(sql);
+    }
 
-            if (con != null) {
-                con.close();
+    public void removeUser(User user) throws SQLException {
+        String sql = "DELETE FROM USERS WHERE USERID=?";
+        JdbcTemplate template = new JdbcTemplate() {
+            @Override
+            public void setParam(PreparedStatement pstmt) throws SQLException {
+                pstmt.setString(1, user.getPassword());
             }
-        }
+        };
+        template.executeUpate(sql);
     }
 
     public List<User> findAll() throws SQLException {
@@ -85,34 +85,24 @@ public class UserDao {
     }
 
     public User findByUserId(String userId) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = ConnectionManager.getConnection();
-            String sql = "SELECT userId, password, name, email FROM USERS WHERE userid=?";
-            pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, userId);
+        String sql = "SELECT userId, password, name, email FROM USERS where userId=?";
+        SelectJdbcTemplate jdbcTemplate = new SelectJdbcTemplate() {
+            @Override
+            public void setParam(PreparedStatement pstmt) throws SQLException {
+                pstmt.setString(1,userId);
+            }
 
-            rs = pstmt.executeQuery();
-
-            User user = null;
-            if (rs.next()) {
-                user = new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"),
+            @Override
+            public User mapRow(ResultSet rs) throws SQLException {
+                if(!rs.next()) {
+                    return null;
+                };
+                return new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"),
                         rs.getString("email"));
             }
-
-            return user;
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (pstmt != null) {
-                pstmt.close();
-            }
-            if (con != null) {
-                con.close();
-            }
-        }
+        };
+        return jdbcTemplate.executeQuery(sql);
     }
+
+
 }
